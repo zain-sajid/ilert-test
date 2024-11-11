@@ -11,7 +11,8 @@ import {
   useSensor,
   useSensors,
   DragStartEvent,
-  DragEndEvent
+  DragEndEvent,
+  DragOverEvent
 } from '@dnd-kit/core';
 
 import {
@@ -20,16 +21,25 @@ import {
   rectSortingStrategy
 } from '@dnd-kit/sortable';
 
-import Item from './item';
-import SortableItem from './sortable-item';
+import { restrictToParentElement } from '@dnd-kit/modifiers';
+import SortableOpenAlerts from './sortable-open-alerts';
 import LargeSortableItem from './large-sortable-item';
 
+type Component = {
+  id: string;
+  component: React.ReactNode;
+};
+
 const App: FC = () => {
-  const [items, setItems] = useState(
-    Array.from({ length: 4 }, (_, i) => (i + 1).toString())
+  const [items, setItems] = useState<Component[]>(
+    [...Array(2)].map((i, index) => ({
+      id: (index + 1).toString(),
+      component: <SortableOpenAlerts id="1" />
+    }))
   );
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const activeComponent = items.find((c) => c.id === activeId)?.component;
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
@@ -38,18 +48,20 @@ const App: FC = () => {
   }, []);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setActiveId(null);
+  }, []);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
       setItems((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
 
         return arrayMove(items, oldIndex, newIndex);
       });
     }
-
-    setActiveId(null);
   }, []);
 
   const handleDragCancel = useCallback(() => {
@@ -63,23 +75,22 @@ const App: FC = () => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      onDragOver={handleDragOver}
     >
       <SortableContext items={items} strategy={rectSortingStrategy}>
-        <div className="mx-auto my-24 flex max-w-[300px] flex-wrap gap-2.5">
-          {items.map((id) => {
-            return id === '2' ? (
-              <LargeSortableItem key={id} id={id} />
+        <div className="mx-auto my-24 flex w-full max-w-4xl flex-wrap gap-2.5">
+          {items.map((c) => {
+            return c.id === '2' ? (
+              <LargeSortableItem key={c.id} id={c.id} />
             ) : (
-              <SortableItem key={id} id={id} />
+              <>{c.component}</>
             );
           })}
         </div>
       </SortableContext>
 
-      <DragOverlay className="bg-red-500">
-        {activeId ? (
-          <Item id={activeId} isDragging fullWidth={activeId === '2'} />
-        ) : null}
+      <DragOverlay modifiers={[restrictToParentElement]}>
+        {activeComponent ? activeComponent : null}
       </DragOverlay>
     </DndContext>
   );

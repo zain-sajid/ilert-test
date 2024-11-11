@@ -1,9 +1,16 @@
-import React, { FC } from 'react';
+import React, { FC, HTMLAttributes } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Item, { ItemProps } from './item';
+import OpenAlerts from './open-alerts';
 
-const LargeSortableItem: FC<ItemProps> = (props) => {
+type ItemProps = HTMLAttributes<HTMLDivElement> & {
+  id: string;
+  fullWidth?: boolean;
+  withOpacity?: boolean;
+  isDragging?: boolean;
+};
+
+const SortableOpenAlerts: FC<ItemProps> = (props) => {
   const {
     isDragging,
     attributes,
@@ -16,19 +23,20 @@ const LargeSortableItem: FC<ItemProps> = (props) => {
   const style = {
     transform: CSS.Translate.toString(transform),
     transition: transition || undefined,
-    width: '100%'
+    width: '50%'
   };
 
   return (
-    <Item
+    <div
       ref={setNodeRef}
       style={style}
-      withOpacity={isDragging}
       {...props}
       {...attributes}
       {...listeners}
-    />
+    >
+      <OpenAlerts />
+    </div>
   );
 };
 
-export default LargeSortableItem;
+export default SortableOpenAlerts;

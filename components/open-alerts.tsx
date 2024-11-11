@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function OpenAlerts() {
   return (
-    <div className="max-w-xl rounded-sm border p-6">
+    <div className="w-full rounded-sm border bg-white p-6">
       <h2 className="mb-4 text-lg font-medium">Open alerts</h2>
 
       <div className="flex">
