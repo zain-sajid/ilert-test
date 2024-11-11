@@ -2,17 +2,18 @@ import React, { forwardRef, HTMLAttributes, CSSProperties } from 'react';
 
 export type ItemProps = HTMLAttributes<HTMLDivElement> & {
   id: string;
+  fullWidth?: boolean;
   withOpacity?: boolean;
   isDragging?: boolean;
 };
 
 const Item = forwardRef<HTMLDivElement, ItemProps>(
-  ({ id, withOpacity, isDragging, style, ...props }, ref) => {
+  ({ id, fullWidth, withOpacity, isDragging, style, ...props }, ref) => {
     const inlineStyles: CSSProperties = {
       opacity: withOpacity ? '0.5' : '1',
       transformOrigin: '50% 50%',
       height: '140px',
-      width: '140px',
+      width: fullWidth ? '280px' : '140px',
       borderRadius: '10px',
       cursor: isDragging ? 'grabbing' : 'grab',
       backgroundColor: '#ffffff',

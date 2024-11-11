@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Item, { ItemProps } from './item';
 
-const SortableItem: FC<ItemProps> = (props) => {
+const LargeSortableItem: FC<ItemProps> = (props) => {
   const {
     isDragging,
     attributes,
@@ -15,7 +15,8 @@ const SortableItem: FC<ItemProps> = (props) => {
 
   const style = {
     transform: CSS.Translate.toString(transform),
-    transition: transition || undefined
+    transition: transition || undefined,
+    width: '280px'
   };
 
   return (
@@ -30,4 +31,4 @@ const SortableItem: FC<ItemProps> = (props) => {
   );
 };
 
-export default SortableItem;
+export default LargeSortableItem;
