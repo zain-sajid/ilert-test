@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { components } from '@/data/components';
-import { DashboardContext } from '@/contexts/dashboard';
+import { DashboardContext } from '@/context/dashboard';
 
 export default function AddComponent() {
   const { addWidgetToDashboard } = useContext(DashboardContext);

@@ -8,7 +8,7 @@ import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 
 export default function OpenIncidents() {
-  const { data: incidents, isLoading } = useSWR(
+  const { data: incidents, isLoading } = useSWR<Incidents>(
     '/api/incidents',
     fetcherWithAuthHeader
   );
@@ -17,9 +17,13 @@ export default function OpenIncidents() {
     return <div>Loading...</div>;
   }
 
+  if (!incidents) {
+    return <div>No incidents found</div>;
+  }
+
   return (
     <div className="flex flex-col">
-      {incidents.map((incident: any) => (
+      {incidents.map((incident) => (
         <div
           key={incident.id}
           className="flex flex-col gap-2 border-t py-2 last:border-b"
@@ -41,7 +45,7 @@ export default function OpenIncidents() {
           </p>
 
           <div className="flex gap-3">
-            {incident.affectedServices.map((affectedService: any) => (
+            {incident.affectedServices.map((affectedService) => (
               <div
                 key={affectedService.service.id}
                 className="flex items-center gap-1"

@@ -7,13 +7,17 @@ import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 
 export default function Services() {
-  const { data: services, isLoading } = useSWR(
+  const { data: services, isLoading } = useSWR<Services>(
     '/api/services?include=uptime',
     fetcherWithAuthHeader
   );
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!services) {
+    return <div>No services found</div>;
   }
 
   function formatTimeSince(timestamp: string) {
@@ -30,7 +34,7 @@ export default function Services() {
 
   return (
     <div className="flex flex-col">
-      {services.map((service: any) => (
+      {services.map((service) => (
         <div key={service.id} className="flex justify-between border-y py-2">
           <div className="flex items-center gap-2">
             <StatusIcon status={service.status} />

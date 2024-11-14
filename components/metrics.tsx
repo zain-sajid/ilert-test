@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import MetricGraph from '@/components/metric-graph';
 
 export default function Metrics() {
-  const { data: metrics, isLoading } = useSWR(
+  const { data: metrics, isLoading } = useSWR<Metrics>(
     '/api/metrics',
     fetcherWithAuthHeader
   );
@@ -15,9 +15,13 @@ export default function Metrics() {
     return <div>Loading...</div>;
   }
 
+  if (!metrics) {
+    return <div>No metrics found</div>;
+  }
+
   return (
     <div className="flex flex-col">
-      {metrics.map((metric: any) => {
+      {metrics.map((metric) => {
         return (
           <div key={metric.id} className="mb-4">
             <MetricGraph metric={metric} />

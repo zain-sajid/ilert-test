@@ -7,11 +7,12 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  YAxis
+  YAxis,
+  TooltipProps
 } from 'recharts';
 import useSWR from 'swr';
 
-export default function MetricGraph({ metric }: { metric: any }) {
+export default function MetricGraph({ metric }: { metric: Metric }) {
   const from = moment().subtract(30, 'day').unix();
   const until = moment().unix();
 
@@ -69,14 +70,18 @@ export default function MetricGraph({ metric }: { metric: any }) {
   );
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label
+}: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-md bg-white p-2 text-sm shadow-md">
         <p className="text-neutral-700">
           {moment.unix(label).format('DD MMM, HH:mm')} -{' '}
           <span className="font-semibold">
-            {payload[0].value.toFixed(2)} ms
+            {payload[0].value?.toFixed(2)} ms
           </span>
         </p>
       </div>

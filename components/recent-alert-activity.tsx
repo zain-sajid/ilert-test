@@ -14,13 +14,17 @@ import Image from 'next/image';
 import useSWR from 'swr';
 
 export default function RecentAlertActivity() {
-  const { data, isLoading } = useSWR(
+  const { data: alertActivity, isLoading } = useSWR<AlertActivityResponse>(
     '/api/alerts/newest-log-entries?include=alert&include=vars',
     fetcherWithAuthHeader
   );
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!alertActivity) {
+    return <div>No alert activity found</div>;
   }
 
   return (
@@ -36,7 +40,7 @@ export default function RecentAlertActivity() {
         </TableHeader>
 
         <TableBody>
-          {data.map((activity: any) => (
+          {alertActivity.map((activity) => (
             <TableRow key={activity.id}>
               <TableCell className="font-medium">
                 <div className="flex flex-wrap gap-2">

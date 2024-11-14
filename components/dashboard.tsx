@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import GridLayout, { WidthProvider } from 'react-grid-layout';
 
 import useSWR from 'swr';
+import type { LayoutConfig, Dashboard } from '@/types';
 import { mutateData } from '@/lib/request';
 import { components } from '@/data/components';
 import { fetcherWithAuthHeader } from '@/lib/fetcher';
-import { DashboardContext } from '@/contexts/dashboard';
+import { DashboardContext } from '@/context/dashboard';
 
 import { Button } from '@/components/ui/button';
 import EditableInput from '@/components/ui/editable-input';
@@ -38,7 +39,7 @@ export default function Dashboard() {
     data: selectedDashboard,
     isLoading: dashboardLoading,
     mutate
-  } = useSWR(
+  } = useSWR<Dashboard>(
     dashboardPreference?.id
       ? `/api/user-dashboards/${dashboardPreference.id}`
       : null,
@@ -48,7 +49,7 @@ export default function Dashboard() {
     }
   );
 
-  const layoutConfig = selectedDashboard?.widgets.map((widget: any) => ({
+  const layoutConfig = selectedDashboard?.widgets.map((widget) => ({
     i: widget.meta.id,
     x: widget.meta.position.x,
     y: widget.meta.position.y,
@@ -56,13 +57,16 @@ export default function Dashboard() {
     h: widget.meta.position.height
   }));
 
-  const updateDashboardLayout = (dashboard: any, newLayout: any): any => {
+  const updateDashboardLayout = (
+    dashboard: Dashboard,
+    newLayout?: LayoutConfig
+  ) => {
+    if (!newLayout) return dashboard;
+
     const updatedDashboard = { ...dashboard };
 
-    updatedDashboard.widgets = dashboard.widgets.map((widget: any) => {
-      const layoutItem = newLayout.find(
-        (item: any) => item.i === widget.meta.id
-      );
+    updatedDashboard.widgets = dashboard.widgets.map((widget) => {
+      const layoutItem = newLayout.find((item) => item.i === widget.meta.id);
 
       if (layoutItem) {
         return {
@@ -86,8 +90,10 @@ export default function Dashboard() {
   };
 
   const addWidgetToDashboard = (type: string) => {
+    if (!selectedDashboard || !layoutConfig) return;
+
     const existingAddComponent = selectedDashboard.widgets.find(
-      (w: any) => w.type === 'ADD_COMPONENT'
+      (w) => w.type === 'ADD_COMPONENT'
     );
 
     const newAddComponentPosition = findLayoutGap(layoutConfig, 12);
@@ -98,8 +104,8 @@ export default function Dashboard() {
       meta: {
         id: crypto.randomUUID(),
         position: {
-          x: newAddComponentPosition.x,
-          y: newAddComponentPosition.y,
+          x: newAddComponentPosition.x || 0,
+          y: newAddComponentPosition.y || 0,
           width: 12,
           height: 6
         }
@@ -110,7 +116,7 @@ export default function Dashboard() {
       type !== 'ADD_COMPONENT'
         ? [
             ...selectedDashboard.widgets.filter(
-              (w: any) => w.meta.id !== existingAddComponent?.meta.id
+              (w) => w.meta.id !== existingAddComponent?.meta.id
             ),
             {
               name:
@@ -120,7 +126,8 @@ export default function Dashboard() {
               meta: {
                 id: crypto.randomUUID(),
                 position: {
-                  ...existingAddComponent?.meta.position,
+                  x: existingAddComponent?.meta.position.x || 0,
+                  y: existingAddComponent?.meta.position.y || 0,
                   width: 12,
                   height: 6
                 }
@@ -142,12 +149,14 @@ export default function Dashboard() {
   };
 
   const saveLayout = async () => {
+    if (!selectedDashboard) return;
+
     setIsSaving(true);
 
     const filteredDashboard = {
       ...selectedDashboard,
       widgets: selectedDashboard.widgets.filter(
-        (widget: any) => widget.type !== 'ADD_COMPONENT'
+        (widget) => widget.type !== 'ADD_COMPONENT'
       )
     };
 
@@ -169,9 +178,11 @@ export default function Dashboard() {
   };
 
   function changeWidgetName(id: string, value: string) {
+    if (!selectedDashboard) return;
+
     const updatedDashboard = {
       ...selectedDashboard,
-      widgets: selectedDashboard.widgets.map((widget: any) =>
+      widgets: selectedDashboard.widgets.map((widget) =>
         widget.meta.id === id
           ? {
               ...widget,
@@ -187,9 +198,13 @@ export default function Dashboard() {
   }
 
   function deleteWidgetFromDashboard(id: string) {
+    if (!selectedDashboard) return;
+
     const widgetToBeDeleted = selectedDashboard.widgets.find(
-      (widget: any) => widget.meta.id === id
+      (widget) => widget.meta.id === id
     );
+
+    if (!widgetToBeDeleted) return;
 
     const addComponentWidget = {
       name: 'Add component',
@@ -209,8 +224,7 @@ export default function Dashboard() {
       ...selectedDashboard,
       widgets: [
         ...selectedDashboard.widgets.filter(
-          (widget: any) =>
-            widget.meta.id !== id && widget.type !== 'ADD_COMPONENT'
+          (widget) => widget.meta.id !== id && widget.type !== 'ADD_COMPONENT'
         ),
         addComponentWidget
       ]
@@ -222,7 +236,7 @@ export default function Dashboard() {
   }
 
   if (dashboardPreferenceLoading) {
-    return <div>Loading dashboard preferences...</div>;
+    return <div>Loading preferences...</div>;
   }
 
   if (!dashboardPreference?.id) {
@@ -231,6 +245,10 @@ export default function Dashboard() {
 
   if (dashboardLoading) {
     return <div>Loading dashboard...</div>;
+  }
+
+  if (!selectedDashboard) {
+    return <div>Dashboard not found</div>;
   }
 
   return (
@@ -288,11 +306,7 @@ export default function Dashboard() {
 
       <DashboardContext.Provider
         value={{
-          addWidgetToDashboard,
-          selectedDashboard,
-          layoutConfig,
-          mutate,
-          isEditing
+          addWidgetToDashboard
         }}
       >
         <ResponsiveGridLayout
@@ -314,7 +328,7 @@ export default function Dashboard() {
           }}
           draggableCancel=".non-draggable"
         >
-          {selectedDashboard.widgets.map((widget: any) => (
+          {selectedDashboard.widgets.map((widget) => (
             <div
               key={widget.meta.id}
               className={cn(
