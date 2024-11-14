@@ -4,16 +4,19 @@ import useSWR from 'swr';
 import Link from 'next/link';
 import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDashboard } from '@/context/dashboard';
 
 export default function OpenAlerts() {
+  const { teamContext } = useDashboard();
+
   const { data: pendingAlerts, isLoading: pendingAlertsLoading } = useSWR(
-    '/api/alerts?states=PENDING',
-    fetcherWithAuthHeader
+    ['/api/alerts?states=PENDING', teamContext],
+    ([url, teamContext]) => fetcherWithAuthHeader(url, teamContext)
   );
 
   const { data: acceptedAlerts, isLoading: acceptedAlertsLoading } = useSWR(
-    '/api/alerts?states=ACCEPTED',
-    fetcherWithAuthHeader
+    ['/api/alerts?states=ACCEPTED', teamContext],
+    ([url, teamContext]) => fetcherWithAuthHeader(url, teamContext)
   );
 
   return (

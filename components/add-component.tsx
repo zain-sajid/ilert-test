@@ -1,6 +1,5 @@
 'use client';
 
-import { useContext } from 'react';
 import { Plus } from 'lucide-react';
 import {
   DropdownMenu,
@@ -9,10 +8,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { components } from '@/data/components';
-import { DashboardContext } from '@/context/dashboard';
+import { useDashboard } from '@/context/dashboard';
 
 export default function AddComponent() {
-  const { addWidgetToDashboard } = useContext(DashboardContext);
+  const { addWidgetToDashboard } = useDashboard();
 
   return (
     <div className="non-draggable h-full w-full">

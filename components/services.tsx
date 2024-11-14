@@ -6,19 +6,23 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 import SkeletonWidget from './skeletons/skeleton-widget';
+import { useDashboard } from '@/context/dashboard';
 
 export default function Services() {
+  const { teamContext } = useDashboard();
+
   const { data: services, isLoading } = useSWR<Services>(
-    '/api/services?include=uptime',
-    fetcherWithAuthHeader
+    ['/api/services?include=uptime', teamContext],
+    ([url, teamContext]) =>
+      fetcherWithAuthHeader(url, teamContext as number | undefined)
   );
 
   if (isLoading) {
     return <SkeletonWidget />;
   }
 
-  if (!services) {
-    return <div>No services found</div>;
+  if (!services || services.length === 0) {
+    return <div className='text-neutral-500'>No services found</div>;
   }
 
   function formatTimeSince(timestamp: string) {

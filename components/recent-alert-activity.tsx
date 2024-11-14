@@ -13,19 +13,23 @@ import moment from 'moment';
 import Image from 'next/image';
 import useSWR from 'swr';
 import SkeletonWidget from './skeletons/skeleton-widget';
+import { useDashboard } from '@/context/dashboard';
 
 export default function RecentAlertActivity() {
+  const { teamContext } = useDashboard();
+
   const { data: alertActivity, isLoading } = useSWR<AlertActivityResponse>(
-    '/api/alerts/newest-log-entries?include=alert&include=vars',
-    fetcherWithAuthHeader
+    ['/api/alerts/newest-log-entries?include=alert&include=vars', teamContext],
+    ([url, teamContext]) =>
+      fetcherWithAuthHeader(url, teamContext as number | undefined)
   );
 
   if (isLoading) {
     return <SkeletonWidget />;
   }
 
-  if (!alertActivity) {
-    return <div>No alert activity found</div>;
+  if (!alertActivity || alertActivity.length === 0) {
+    return <div className="text-neutral-500">No alert activity found</div>;
   }
 
   return (

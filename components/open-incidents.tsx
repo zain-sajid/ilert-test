@@ -7,19 +7,23 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 import SkeletonWidget from './skeletons/skeleton-widget';
+import { useDashboard } from '@/context/dashboard';
 
 export default function OpenIncidents() {
+  const { teamContext } = useDashboard();
+
   const { data: incidents, isLoading } = useSWR<Incidents>(
-    '/api/incidents',
-    fetcherWithAuthHeader
+    ['/api/incidents', teamContext],
+    ([url, teamContext]) =>
+      fetcherWithAuthHeader(url, teamContext as number | undefined)
   );
 
   if (isLoading) {
     return <SkeletonWidget />;
   }
 
-  if (!incidents) {
-    return <div>No incidents found</div>;
+  if (!incidents || incidents.length === 0) {
+    return <div className="text-neutral-500">No incidents found</div>;
   }
 
   return (

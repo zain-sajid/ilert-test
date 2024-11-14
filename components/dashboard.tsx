@@ -33,6 +33,17 @@ export default function Dashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  const { data: user, isLoading: userLoading } = useSWR<User>(
+    '/api/users/current',
+    fetcherWithAuthHeader
+  );
+  const teamContext = user?.teamContext;
+
+  const { data: selectedTeam } = useSWR(
+    teamContext ? `/api/teams/${teamContext}` : null,
+    fetcherWithAuthHeader
+  );
+
   const { data: dashboardPreference, isLoading: dashboardPreferenceLoading } =
     useSWR('/api/v1/user-view-preferences/DASHBOARD', fetcherWithAuthHeader);
 
@@ -236,7 +247,7 @@ export default function Dashboard() {
     });
   }
 
-  if (dashboardPreferenceLoading || dashboardLoading) {
+  if (dashboardPreferenceLoading || dashboardLoading || userLoading) {
     return <SkeletonDashboard />;
   }
 
@@ -252,7 +263,7 @@ export default function Dashboard() {
     <div>
       <div className="flex justify-between">
         <h1 className="text-xl font-medium">
-          {selectedDashboard.name} / All teams
+          {selectedDashboard.name} / {selectedTeam?.name || 'All teams'}
         </h1>
 
         <div className="mb-2 flex gap-2">
@@ -303,7 +314,8 @@ export default function Dashboard() {
 
       <DashboardContext.Provider
         value={{
-          addWidgetToDashboard
+          addWidgetToDashboard,
+          teamContext
         }}
       >
         <ResponsiveGridLayout
@@ -351,7 +363,7 @@ export default function Dashboard() {
                   </Button>
                 </div>
               ) : (
-                <h2 className="py-1 pr-3 text-lg font-medium">{widget.name}</h2>
+                <h2 className="pr-3 text-lg font-medium">{widget.name}</h2>
               )}
 
               <DashboardComponent type={widget.type} />

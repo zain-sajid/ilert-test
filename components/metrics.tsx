@@ -5,19 +5,23 @@ import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import useSWR from 'swr';
 import MetricGraph from '@/components/metric-graph';
 import SkeletonWidget from '@/components/skeletons/skeleton-widget';
+import { useDashboard } from '@/context/dashboard';
 
 export default function Metrics() {
+  const { teamContext } = useDashboard();
+
   const { data: metrics, isLoading } = useSWR<Metrics>(
-    '/api/metrics',
-    fetcherWithAuthHeader
+    ['/api/metrics', teamContext],
+    ([url, teamContext]) =>
+      fetcherWithAuthHeader(url, teamContext as number | undefined)
   );
 
   if (isLoading) {
     return <SkeletonWidget />;
   }
 
-  if (!metrics) {
-    return <div>No metrics found</div>;
+  if (!metrics || metrics.length === 0) {
+    return <div className="text-neutral-500">No metrics found</div>;
   }
 
   return (
