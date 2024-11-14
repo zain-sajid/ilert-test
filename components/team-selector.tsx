@@ -1,5 +1,6 @@
 'use client';
 
+import useSWR from 'swr';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +10,7 @@ import {
 import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import { mutateData } from '@/lib/request';
 import { ChevronDown } from 'lucide-react';
-import useSWR from 'swr';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function TeamSelector() {
   const {
@@ -34,6 +34,7 @@ export default function TeamSelector() {
       { context: teamId },
       'PUT'
     );
+
     mutate({
       ...user,
       teamContext: teamId
