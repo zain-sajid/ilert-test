@@ -9,7 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { components, DashboardContext } from '@/components/dashboard';
+import { components } from '@/data/components';
+import { DashboardContext } from '@/contexts/dashboard';
 
 export default function AddComponent({
   id,
@@ -38,15 +39,16 @@ export default function AddComponent({
       }
     };
 
-    const newPosition = findLayoutGap(layoutConfig, 12);
-    const newAddWidget = {
+    const addComponentPosition = findLayoutGap(layoutConfig, 12);
+
+    const addComponentWidget = {
       name: 'Add component',
       type: 'ADD_COMPONENT',
       meta: {
         id: crypto.randomUUID(),
         position: {
-          x: newPosition.x,
-          y: newPosition.y,
+          x: addComponentPosition.x,
+          y: addComponentPosition.y,
           width: 12,
           height: 6
         }
@@ -59,7 +61,7 @@ export default function AddComponent({
         widgets: [
           ...selectedDashboard.widgets.filter((w: any) => w.meta.id !== id),
           newWidget,
-          newAddWidget
+          addComponentWidget
         ]
       },
       {
@@ -67,6 +69,7 @@ export default function AddComponent({
       }
     );
   };
+
   return (
     <div className="non-draggable h-full w-full">
       <DropdownMenu>

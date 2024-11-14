@@ -29,25 +29,21 @@ export default function Services() {
   }
 
   return (
-    <div className="h-full w-full rounded-sm border bg-white p-6">
-      <h2 className="mb-4 text-lg font-medium">Services</h2>
-
-      <div className="flex flex-col">
-        {services.map((service: any) => (
-          <div key={service.id} className="flex justify-between border-y py-2">
-            <div className="flex items-center gap-2">
-              <StatusIcon status={service.status} />
-              <Link href="#" className="text-sm text-blue-700 hover:underline">
-                {service.name}
-              </Link>
-            </div>
-
-            <div className="text-sm text-neutral-700">
-              {`${service.uptime.uptimePercentage.p90.toFixed(0)}% uptime in the past ${formatTimeSince(service.uptime.rangeStart)}`}
-            </div>
+    <div className="flex flex-col">
+      {services.map((service: any) => (
+        <div key={service.id} className="flex justify-between border-y py-2">
+          <div className="flex items-center gap-2">
+            <StatusIcon status={service.status} />
+            <Link href="#" className="text-sm text-blue-700 hover:underline">
+              {service.name}
+            </Link>
           </div>
-        ))}
-      </div>
+
+          <div className="text-sm text-neutral-700">
+            {`${service.uptime.uptimePercentage.p90.toFixed(0)}% uptime in the past ${formatTimeSince(service.uptime.rangeStart)}`}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

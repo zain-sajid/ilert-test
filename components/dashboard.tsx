@@ -1,22 +1,17 @@
 'use client';
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import GridLayout, { WidthProvider } from 'react-grid-layout';
 
 import useSWR from 'swr';
 import { mutateData } from '@/lib/request';
+import { components } from '@/data/components';
 import { fetcherWithAuthHeader } from '@/lib/fetcher';
+import { DashboardContext } from '@/contexts/dashboard';
 
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import OpenAlerts from '@/components/open-alerts';
-
-import Metrics from '@/components/metrics';
-import Services from '@/components/services';
 import { Button } from '@/components/ui/button';
-import AddComponent from '@/components/add-component';
-import OpenIncidents from '@/components/open-incidents';
-import RecentAlertActivity from '@/components/recent-alert-activity';
+import EditableInput from '@/components/ui/editable-input';
+import DashboardComponent from '@/components/dashboard-component';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,53 +20,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn, findLayoutGap } from '@/lib/utils';
-import { Loader2, Pencil, Plus, Save } from 'lucide-react';
+import { Loader2, Pencil, Plus, Save, Trash } from 'lucide-react';
 
-export const components = [
-  {
-    type: 'OPEN_ALERTS',
-    name: 'Open alerts'
-  },
-  {
-    type: 'ALERT_ACTIVITY',
-    name: 'Recent alert activity'
-  },
-  {
-    type: 'METRICS',
-    name: 'Metrics'
-  },
-  {
-    type: 'SERVICES',
-    name: 'Service status'
-  },
-  {
-    type: 'OPEN_INCIDENTS',
-    name: 'Open incidents'
-  },
-  {
-    type: 'ADD_COMPONENT',
-    name: 'Add component'
-  }
-];
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 const ResponsiveGridLayout = WidthProvider(GridLayout);
-
-type DashboardContextType = {
-  selectedDashboard: any;
-  layoutConfig: any;
-  mutate: any;
-  isEditing: boolean;
-};
-
-export const DashboardContext = createContext<DashboardContextType>(
-  {} as DashboardContextType
-);
 
 export default function Dashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
-  const [layoutConfig, setLayoutConfig] = useState<any>(null);
 
   const { data: dashboardPreference, isLoading: dashboardPreferenceLoading } =
     useSWR('/api/v1/user-view-preferences/DASHBOARD', fetcherWithAuthHeader);
@@ -90,19 +48,13 @@ export default function Dashboard() {
     }
   );
 
-  useEffect(() => {
-    if (selectedDashboard) {
-      setLayoutConfig(
-        selectedDashboard.widgets.map((widget: any) => ({
-          i: widget.meta.id,
-          x: widget.meta.position.x,
-          y: widget.meta.position.y,
-          w: widget.meta.position.width,
-          h: widget.meta.position.height
-        }))
-      );
-    }
-  }, [selectedDashboard]);
+  const layoutConfig = selectedDashboard?.widgets.map((widget: any) => ({
+    i: widget.meta.id,
+    x: widget.meta.position.x,
+    y: widget.meta.position.y,
+    w: widget.meta.position.width,
+    h: widget.meta.position.height
+  }));
 
   const updateDashboardLayout = (dashboard: any, newLayout: any): any => {
     const updatedDashboard = { ...dashboard };
@@ -126,34 +78,62 @@ export default function Dashboard() {
           }
         };
       }
+
       return widget;
     });
 
     return updatedDashboard;
   };
 
-  const addComponentToLayout = (type: string) => {
-    const newPosition = findLayoutGap(layoutConfig, 12);
-    const newWidget = {
-      name:
-        components.find((component) => component.type === type)?.name ||
-        'Widget',
-      type,
+  const addWidgetToDashboard = (type: string) => {
+    const existingAddComponent = selectedDashboard.widgets.find(
+      (w: any) => w.type === 'ADD_COMPONENT'
+    );
+
+    const newAddComponentPosition = findLayoutGap(layoutConfig, 12);
+
+    const newAddComponentWidget = {
+      name: 'Add component',
+      type: 'ADD_COMPONENT',
       meta: {
         id: crypto.randomUUID(),
         position: {
-          x: newPosition.x,
-          y: newPosition.y,
+          x: newAddComponentPosition.x,
+          y: newAddComponentPosition.y,
           width: 12,
           height: 6
         }
       }
     };
 
+    const widgets =
+      type !== 'ADD_COMPONENT'
+        ? [
+            ...selectedDashboard.widgets.filter(
+              (w: any) => w.meta.id !== existingAddComponent?.meta.id
+            ),
+            {
+              name:
+                components.find((component) => component.type === type)?.name ||
+                'Widget',
+              type,
+              meta: {
+                id: crypto.randomUUID(),
+                position: {
+                  ...existingAddComponent?.meta.position,
+                  width: 12,
+                  height: 6
+                }
+              }
+            },
+            newAddComponentWidget
+          ]
+        : [...selectedDashboard.widgets, newAddComponentWidget];
+
     mutate(
       {
         ...selectedDashboard,
-        widgets: [...selectedDashboard.widgets, newWidget]
+        widgets: widgets
       },
       {
         revalidate: false
@@ -161,7 +141,7 @@ export default function Dashboard() {
     );
   };
 
-  async function saveLayout() {
+  const saveLayout = async () => {
     setIsSaving(true);
 
     const filteredDashboard = {
@@ -181,12 +161,65 @@ export default function Dashboard() {
 
     mutate(data);
     setIsSaving(false);
-  }
+  };
 
   const handleEditMode = () => {
-    addComponentToLayout('ADD_COMPONENT');
+    addWidgetToDashboard('ADD_COMPONENT');
     setIsEditing(true);
   };
+
+  function changeWidgetName(id: string, value: string) {
+    const updatedDashboard = {
+      ...selectedDashboard,
+      widgets: selectedDashboard.widgets.map((widget: any) =>
+        widget.meta.id === id
+          ? {
+              ...widget,
+              name: value
+            }
+          : widget
+      )
+    };
+
+    mutate(updatedDashboard, {
+      revalidate: false
+    });
+  }
+
+  function deleteWidgetFromDashboard(id: string) {
+    const widgetToBeDeleted = selectedDashboard.widgets.find(
+      (widget: any) => widget.meta.id === id
+    );
+
+    const addComponentWidget = {
+      name: 'Add component',
+      type: 'ADD_COMPONENT',
+      meta: {
+        id: crypto.randomUUID(),
+        position: {
+          x: widgetToBeDeleted.meta.position.x,
+          y: widgetToBeDeleted.meta.position.y,
+          width: 12,
+          height: 6
+        }
+      }
+    };
+
+    const updatedDashboard = {
+      ...selectedDashboard,
+      widgets: [
+        ...selectedDashboard.widgets.filter(
+          (widget: any) =>
+            widget.meta.id !== id && widget.type !== 'ADD_COMPONENT'
+        ),
+        addComponentWidget
+      ]
+    };
+
+    mutate(updatedDashboard, {
+      revalidate: false
+    });
+  }
 
   if (dashboardPreferenceLoading) {
     return <div>Loading preferences...</div>;
@@ -204,6 +237,7 @@ export default function Dashboard() {
     <div>
       <div className="flex justify-between">
         <h1 className="text-xl font-medium">Zain's Dashboard / All teams</h1>
+
         <div className="mb-2 flex gap-2">
           {isEditing ? (
             <Button
@@ -239,7 +273,7 @@ export default function Dashboard() {
                   .map((component) => (
                     <DropdownMenuItem
                       key={component.type}
-                      onClick={() => addComponentToLayout(component.type)}
+                      onClick={() => addWidgetToDashboard(component.type)}
                     >
                       {component.name}
                     </DropdownMenuItem>
@@ -249,6 +283,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
       <DashboardContext.Provider
         value={{ selectedDashboard, layoutConfig, mutate, isEditing }}
       >
@@ -259,19 +294,51 @@ export default function Dashboard() {
           rowHeight={50}
           isResizable={false}
           isDraggable={isEditing}
-          onLayoutChange={(layout) => setLayoutConfig(layout)}
+          onLayoutChange={(layout) => {
+            const updatedDashboard = updateDashboardLayout(
+              selectedDashboard,
+              layout
+            );
+
+            mutate(updatedDashboard, {
+              revalidate: false
+            });
+          }}
           draggableCancel=".non-draggable"
         >
           {selectedDashboard.widgets.map((widget: any) => (
             <div
               key={widget.meta.id}
-              className={cn('w-full', isEditing && 'cursor-pointer')}
+              className={cn(
+                'flex h-full w-full flex-col gap-2 overflow-auto rounded-sm border',
+                isEditing && 'cursor-pointer',
+                widget.type !== 'ADD_COMPONENT' && 'bg-white p-6'
+              )}
             >
+              {widget.type === 'ADD_COMPONENT' ? null : isEditing ? (
+                <div className="non-draggable flex justify-between">
+                  <EditableInput
+                    value={widget.name}
+                    onValueChange={(value) => {
+                      changeWidgetName(widget.meta.id, value);
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    onClick={() => deleteWidgetFromDashboard(widget.meta.id)}
+                  >
+                    <Trash className="h-6 w-6" />
+                  </Button>
+                </div>
+              ) : (
+                <h2 className="py-1 pr-3 text-lg font-medium">{widget.name}</h2>
+              )}
+
               <DashboardComponent
                 id={widget.meta.id}
-                position={widget.meta.position}
-                name={widget.name}
                 type={widget.type}
+                position={widget.meta.position}
               />
             </div>
           ))}
@@ -279,33 +346,4 @@ export default function Dashboard() {
       </DashboardContext.Provider>
     </div>
   );
-}
-
-function DashboardComponent({
-  id,
-  name,
-  type,
-  position
-}: {
-  id: string;
-  name: string;
-  type: string;
-  position: any;
-}) {
-  switch (type) {
-    case 'OPEN_ALERTS':
-      return <OpenAlerts id={id} initialName={name} />;
-    case 'ALERT_ACTIVITY':
-      return <RecentAlertActivity />;
-    case 'METRICS':
-      return <Metrics />;
-    case 'SERVICES':
-      return <Services />;
-    case 'OPEN_INCIDENTS':
-      return <OpenIncidents />;
-    case 'ADD_COMPONENT':
-      return <AddComponent id={id} position={position} />;
-    default:
-      return <div>Unknown widget type</div>;
-  }
 }

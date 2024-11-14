@@ -30,7 +30,7 @@ export default function EditableInput({
   };
 
   return (
-    <div className="max-w-[500px]">
+    <div className="w-full max-w-[500px]">
       {isEditing ? (
         <form className="relative flex flex-col" onSubmit={handleSubmit}>
           <Input
@@ -61,7 +61,7 @@ export default function EditableInput({
         </form>
       ) : (
         <div
-          className="group flex cursor-pointer items-center justify-between px-3 py-1 text-lg font-medium hover:bg-neutral-100"
+          className="group flex cursor-pointer items-center justify-between rounded-sm pr-3 py-1 text-lg font-medium hover:bg-neutral-100"
           onClick={() => setIsEditing(true)}
         >
           {value}
