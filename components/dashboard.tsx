@@ -222,7 +222,7 @@ export default function Dashboard() {
   }
 
   if (dashboardPreferenceLoading) {
-    return <div>Loading preferences...</div>;
+    return <div>Loading dashboard preferences...</div>;
   }
 
   if (!dashboardPreference?.id) {
@@ -236,7 +236,9 @@ export default function Dashboard() {
   return (
     <div>
       <div className="flex justify-between">
-        <h1 className="text-xl font-medium">Zain's Dashboard / All teams</h1>
+        <h1 className="text-xl font-medium">
+          {selectedDashboard.name} / All teams
+        </h1>
 
         <div className="mb-2 flex gap-2">
           {isEditing ? (
@@ -285,7 +287,13 @@ export default function Dashboard() {
       </div>
 
       <DashboardContext.Provider
-        value={{ selectedDashboard, layoutConfig, mutate, isEditing }}
+        value={{
+          addWidgetToDashboard,
+          selectedDashboard,
+          layoutConfig,
+          mutate,
+          isEditing
+        }}
       >
         <ResponsiveGridLayout
           className="select-none"
@@ -335,11 +343,7 @@ export default function Dashboard() {
                 <h2 className="py-1 pr-3 text-lg font-medium">{widget.name}</h2>
               )}
 
-              <DashboardComponent
-                id={widget.meta.id}
-                type={widget.type}
-                position={widget.meta.position}
-              />
+              <DashboardComponent type={widget.type} />
             </div>
           ))}
         </ResponsiveGridLayout>

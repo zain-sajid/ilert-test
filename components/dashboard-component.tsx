@@ -5,15 +5,7 @@ import AddComponent from '@/components/add-component';
 import OpenIncidents from '@/components/open-incidents';
 import RecentAlertActivity from '@/components/recent-alert-activity';
 
-export default function DashboardComponent({
-  id,
-  type,
-  position
-}: {
-  id: string;
-  type: string;
-  position: any;
-}) {
+export default function DashboardComponent({ type }: { type: string }) {
   switch (type) {
     case 'OPEN_ALERTS':
       return <OpenAlerts />;
@@ -26,7 +18,7 @@ export default function DashboardComponent({
     case 'OPEN_INCIDENTS':
       return <OpenIncidents />;
     case 'ADD_COMPONENT':
-      return <AddComponent id={id} position={position} />;
+      return <AddComponent />;
     default:
       return <div>Unknown widget type</div>;
   }

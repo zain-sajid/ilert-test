@@ -5,6 +5,7 @@ type DashboardContextType = {
   layoutConfig: any;
   mutate: any;
   isEditing: boolean;
+  addWidgetToDashboard: (type: string) => void;
 };
 
 export const DashboardContext = createContext<DashboardContextType>(

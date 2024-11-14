@@ -2,7 +2,6 @@
 
 import { useContext } from 'react';
 import { Plus } from 'lucide-react';
-import { findLayoutGap } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,63 +11,8 @@ import {
 import { components } from '@/data/components';
 import { DashboardContext } from '@/contexts/dashboard';
 
-export default function AddComponent({
-  id,
-  position
-}: {
-  id: string;
-  position: any;
-}) {
-  const { selectedDashboard, layoutConfig, mutate } =
-    useContext(DashboardContext);
-
-  const addComponentToLayout = (type: string) => {
-    const newWidget = {
-      name:
-        components.find((component) => component.type === type)?.name ||
-        'Widget',
-      type,
-      meta: {
-        id: crypto.randomUUID(),
-        position: {
-          x: position.x,
-          y: position.y,
-          width: 12,
-          height: 6
-        }
-      }
-    };
-
-    const addComponentPosition = findLayoutGap(layoutConfig, 12);
-
-    const addComponentWidget = {
-      name: 'Add component',
-      type: 'ADD_COMPONENT',
-      meta: {
-        id: crypto.randomUUID(),
-        position: {
-          x: addComponentPosition.x,
-          y: addComponentPosition.y,
-          width: 12,
-          height: 6
-        }
-      }
-    };
-
-    mutate(
-      {
-        ...selectedDashboard,
-        widgets: [
-          ...selectedDashboard.widgets.filter((w: any) => w.meta.id !== id),
-          newWidget,
-          addComponentWidget
-        ]
-      },
-      {
-        revalidate: false
-      }
-    );
-  };
+export default function AddComponent() {
+  const { addWidgetToDashboard } = useContext(DashboardContext);
 
   return (
     <div className="non-draggable h-full w-full">
@@ -85,7 +29,7 @@ export default function AddComponent({
             .map((component) => (
               <DropdownMenuItem
                 key={component.type}
-                onClick={() => addComponentToLayout(component.type)}
+                onClick={() => addWidgetToDashboard(component.type)}
               >
                 {component.name}
               </DropdownMenuItem>
