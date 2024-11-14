@@ -12,6 +12,7 @@ import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import moment from 'moment';
 import Image from 'next/image';
 import useSWR from 'swr';
+import SkeletonWidget from './skeletons/skeleton-widget';
 
 export default function RecentAlertActivity() {
   const { data: alertActivity, isLoading } = useSWR<AlertActivityResponse>(
@@ -20,7 +21,7 @@ export default function RecentAlertActivity() {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SkeletonWidget />;
   }
 
   if (!alertActivity) {

@@ -5,6 +5,7 @@ import moment from 'moment';
 import Link from 'next/link';
 import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
+import SkeletonWidget from './skeletons/skeleton-widget';
 
 export default function Services() {
   const { data: services, isLoading } = useSWR<Services>(
@@ -13,7 +14,7 @@ export default function Services() {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SkeletonWidget />;
   }
 
   if (!services) {

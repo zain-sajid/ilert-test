@@ -13,6 +13,7 @@ import { DashboardContext } from '@/context/dashboard';
 import { Button } from '@/components/ui/button';
 import EditableInput from '@/components/ui/editable-input';
 import DashboardComponent from '@/components/dashboard-component';
+import SkeletonDashboard from '@/components/skeletons/skeleton-dashboard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -235,16 +236,12 @@ export default function Dashboard() {
     });
   }
 
-  if (dashboardPreferenceLoading) {
-    return <div>Loading preferences...</div>;
+  if (dashboardPreferenceLoading || dashboardLoading) {
+    return <SkeletonDashboard />;
   }
 
   if (!dashboardPreference?.id) {
     return <div>No dashboard selected</div>;
-  }
-
-  if (dashboardLoading) {
-    return <div>Loading dashboard...</div>;
   }
 
   if (!selectedDashboard) {

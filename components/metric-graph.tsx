@@ -30,7 +30,7 @@ export default function MetricGraph({ metric }: { metric: Metric }) {
       <div className="mb-1 flex justify-between">
         <h3 className="text-sm font-medium">{metric.name}</h3>
         <h4 className="text-sm font-medium text-neutral-500">
-          {metric.aggregationType} - {data.totalAgg.toFixed(2)} ms
+          {metric.aggregationType} - {data?.totalAgg?.toFixed(2)} ms
         </h4>
       </div>
       <ResponsiveContainer width="100%" height={175}>

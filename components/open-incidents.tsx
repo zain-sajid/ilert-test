@@ -6,6 +6,7 @@ import moment from 'moment';
 import Link from 'next/link';
 import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
+import SkeletonWidget from './skeletons/skeleton-widget';
 
 export default function OpenIncidents() {
   const { data: incidents, isLoading } = useSWR<Incidents>(
@@ -14,7 +15,7 @@ export default function OpenIncidents() {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SkeletonWidget />;
   }
 
   if (!incidents) {

@@ -30,13 +30,6 @@ type WidgetMeta = {
   selectedEntities?: any[];
 };
 
-type WidgetType =
-  | 'ALERT_ACTIVITY'
-  | 'OPEN_INCIDENTS'
-  | 'METRICS'
-  | 'OPEN_ALERTS'
-  | 'SERVICES';
-
 type Widget = {
   name: string;
   type: string;

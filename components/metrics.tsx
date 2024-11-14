@@ -4,6 +4,7 @@ import { fetcherWithAuthHeader } from '@/lib/fetcher';
 
 import useSWR from 'swr';
 import MetricGraph from '@/components/metric-graph';
+import SkeletonWidget from '@/components/skeletons/skeleton-widget';
 
 export default function Metrics() {
   const { data: metrics, isLoading } = useSWR<Metrics>(
@@ -12,7 +13,7 @@ export default function Metrics() {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <SkeletonWidget />;
   }
 
   if (!metrics) {
