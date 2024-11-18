@@ -2,19 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies using:
+```bash
+npm install
+# or
+yarn
+```
+2. Create the `.env` file by copying `.env.example` and adding the API key
 
+3. Run the application using:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Tools used
 - [Next.js](https://nextjs.org)
