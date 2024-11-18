@@ -83,3 +83,7 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.react-grid-item.react-grid-placeholder {
+  background: blue !important;
+}
