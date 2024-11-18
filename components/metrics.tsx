@@ -1,20 +1,17 @@
 'use client';
 
-import { fetcherWithAuthHeader } from '@/lib/fetcher';
-
-import useSWR from 'swr';
 import MetricGraph from '@/components/metric-graph';
 import SkeletonWidget from '@/components/skeletons/skeleton-widget';
 import { useDashboard } from '@/context/dashboard';
+import { useSWRWithContext } from '@/hooks/useSWRWithContext';
 
 export default function Metrics() {
   const { teamContext } = useDashboard();
 
-  const { data: metrics, isLoading } = useSWR<Metrics>(
-    ['/api/metrics', teamContext],
-    ([url, teamContext]) =>
-      fetcherWithAuthHeader(url, teamContext as number | undefined)
-  );
+  const { data: metrics, isLoading } = useSWRWithContext<Metrics>({
+    url: '/api/metrics',
+    teamContext
+  });
 
   if (isLoading) {
     return <SkeletonWidget />;

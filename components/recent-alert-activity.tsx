@@ -8,21 +8,20 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import moment from 'moment';
 import Image from 'next/image';
-import useSWR from 'swr';
 import SkeletonWidget from './skeletons/skeleton-widget';
 import { useDashboard } from '@/context/dashboard';
+import { useSWRWithContext } from '@/hooks/useSWRWithContext';
 
 export default function RecentAlertActivity() {
   const { teamContext } = useDashboard();
 
-  const { data: alertActivity, isLoading } = useSWR<AlertActivityResponse>(
-    ['/api/alerts/newest-log-entries?include=alert&include=vars', teamContext],
-    ([url, teamContext]) =>
-      fetcherWithAuthHeader(url, teamContext as number | undefined)
-  );
+  const { data: alertActivity, isLoading } =
+    useSWRWithContext<AlertActivityResponse>({
+      url: '/api/alerts/newest-log-entries?include=alert&include=vars',
+      teamContext
+    });
 
   if (isLoading) {
     return <SkeletonWidget />;

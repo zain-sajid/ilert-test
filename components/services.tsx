@@ -1,28 +1,26 @@
 'use client';
 
-import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import moment from 'moment';
 import Link from 'next/link';
-import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 import SkeletonWidget from './skeletons/skeleton-widget';
 import { useDashboard } from '@/context/dashboard';
+import { useSWRWithContext } from '@/hooks/useSWRWithContext';
 
 export default function Services() {
   const { teamContext } = useDashboard();
 
-  const { data: services, isLoading } = useSWR<Services>(
-    ['/api/services?include=uptime', teamContext],
-    ([url, teamContext]) =>
-      fetcherWithAuthHeader(url, teamContext as number | undefined)
-  );
+  const { data: services, isLoading } = useSWRWithContext<Services>({
+    url: '/api/services?include=uptime',
+    teamContext
+  });
 
   if (isLoading) {
     return <SkeletonWidget />;
   }
 
   if (!services || services.length === 0) {
-    return <div className='text-neutral-500'>No services found</div>;
+    return <div className="text-neutral-500">No services found</div>;
   }
 
   function formatTimeSince(timestamp: string) {

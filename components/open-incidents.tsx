@@ -1,22 +1,19 @@
 'use client';
 
-import { fetcherWithAuthHeader } from '@/lib/fetcher';
-
 import moment from 'moment';
 import Link from 'next/link';
-import useSWR from 'swr';
 import StatusIcon from '@/components/status-icon';
 import SkeletonWidget from './skeletons/skeleton-widget';
 import { useDashboard } from '@/context/dashboard';
+import { useSWRWithContext } from '@/hooks/useSWRWithContext';
 
 export default function OpenIncidents() {
   const { teamContext } = useDashboard();
 
-  const { data: incidents, isLoading } = useSWR<Incidents>(
-    ['/api/incidents', teamContext],
-    ([url, teamContext]) =>
-      fetcherWithAuthHeader(url, teamContext as number | undefined)
-  );
+  const { data: incidents, isLoading } = useSWRWithContext<Incidents>({
+    url: '/api/incidents',
+    teamContext
+  });
 
   if (isLoading) {
     return <SkeletonWidget />;

@@ -1,23 +1,24 @@
 'use client';
 
-import useSWR from 'swr';
 import Link from 'next/link';
-import { fetcherWithAuthHeader } from '@/lib/fetcher';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboard } from '@/context/dashboard';
+import { useSWRWithContext } from '@/hooks/useSWRWithContext';
 
 export default function OpenAlerts() {
   const { teamContext } = useDashboard();
 
-  const { data: pendingAlerts, isLoading: pendingAlertsLoading } = useSWR(
-    ['/api/alerts?states=PENDING', teamContext],
-    ([url, teamContext]) => fetcherWithAuthHeader(url, teamContext)
-  );
+  const { data: pendingAlerts, isLoading: pendingAlertsLoading } =
+    useSWRWithContext<Alerts>({
+      url: '/api/alerts?states=PENDING',
+      teamContext
+    });
 
-  const { data: acceptedAlerts, isLoading: acceptedAlertsLoading } = useSWR(
-    ['/api/alerts?states=ACCEPTED', teamContext],
-    ([url, teamContext]) => fetcherWithAuthHeader(url, teamContext)
-  );
+  const { data: acceptedAlerts, isLoading: acceptedAlertsLoading } =
+    useSWRWithContext<Alerts>({
+      url: '/api/alerts?states=ACCEPTED',
+      teamContext
+    });
 
   return (
     <div className="flex h-full items-center">
@@ -30,7 +31,7 @@ export default function OpenAlerts() {
             href="#"
             className="text-3xl font-bold text-blue-700 hover:underline"
           >
-            {pendingAlerts?.length}
+            {pendingAlerts?.length ?? 0}
           </Link>
         )}
       </div>
@@ -46,7 +47,7 @@ export default function OpenAlerts() {
             href="#"
             className="text-3xl font-bold text-blue-700 hover:underline"
           >
-            {acceptedAlerts?.length}
+            {acceptedAlerts?.length ?? 0}
           </Link>
         )}
       </div>

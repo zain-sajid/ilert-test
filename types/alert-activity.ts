@@ -8,6 +8,8 @@ interface Alert {
   alertSource: AlertSource;
 }
 
+type Alerts = Alert[];
+
 interface AlertActivity {
   id: number;
   timestamp: string;
